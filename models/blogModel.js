@@ -2,6 +2,11 @@ import mongoose from 'mongoose';
 
 // Blog Schema
 const BlogSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  }, // Reference to User model
   title: {
     type: String,
     required: true,
@@ -19,8 +24,7 @@ const BlogSchema = new mongoose.Schema({
   ],
   images: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Image', // Embedding the Image model for an array of images
+      type: String,
     },
   ],
   status: {

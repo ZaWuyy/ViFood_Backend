@@ -1,12 +1,15 @@
 // services/vnpayService.js
 import crypto from 'crypto';
 import moment from 'moment';
+import dotenv from 'dotenv';
 
 // Các thông tin cấu hình của VNPay
-const VNPAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; // URL của VNPay
-const VNPAY_TMN_CODE = "YOUR_TMN_CODE"; // Mã đơn vị của bạn
-const VNPAY_HASH_SECRET = "YOUR_HASH_SECRET"; // Mã bí mật từ VNPay
-const VNPAY_RETURN_URL = "YOUR_RETURN_URL"; // URL để VNPay chuyển kết quả về (thường là trang thông báo kết quả thanh toán)
+dotenv.config();
+
+const VNPAY_URL = process.env.VNPAY_URL; // URL của VNPay
+const VNPAY_TMN_CODE = process.env.VNPAY_TMN_CODE; // Mã đơn vị của bạn
+const VNPAY_HASH_SECRET = process.env.VNPAY_HASH_SECRET; // Mã bí mật từ VNPay
+const VNPAY_RETURN_URL = process.env.VNPAY_RETURN_URL; // URL để VNPay chuyển kết quả về (thường là trang thông báo kết quả thanh toán)
 
 // Hàm tạo mã hash cho yêu cầu thanh toán
 const generateVnpayHash = (params) => {

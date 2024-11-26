@@ -1,6 +1,18 @@
-import mongoose from "mongoose";
+// db.js
+const mongoose = require("mongoose");
+require("dotenv").config();
 
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+    process.exit(1);
+  }
+};
 
-export const connectDB = async () => {
-    await mongoose.connect('mongodb://localhost:27017/Foods').then(()=>console.log('DB Connected'));
-}
+module.exports = connectDB;

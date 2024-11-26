@@ -12,9 +12,7 @@ const categorySchema = new mongoose.Schema({
     trim: true, // Removes extra spaces
   },
   image: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Image',
-    required: true, // Image is mandatory
+    String, // Image is mandatory
   },
 
   active: {

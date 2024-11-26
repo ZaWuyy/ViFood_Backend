@@ -1,18 +1,31 @@
-import jwt from "jsonwebtoken"
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-const authMiddleware = async (req, res, next) => {
-    const {token} = req.headers;
-    if (!token) {
-        return res.json({success: false, message: "No Authorized Login Again"});
-    }
-    try {
-        const token_decode = jwt.verify(token,process.env.JWT_SECRET);
-        req.body.userId =token_decode.id;
-        next();
-    } catch (error) {
-        console.error(error);
-        res.json({success: false, message: "Error"});  
-    }
-}
+const jwtSecret = process.env.JWT_SECRET || "default_secret";
+const jwtExpiry = "7d";
 
-export default authMiddleware;
+const generateToken = (payload) => {
+  return jwt.sign(payload, jwtSecret, { expiresIn: jwtExpiry });
+};
+
+const verifyToken = (req, res, next) => {
+  const authHeader = req.header("Authorization");
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Access Denied" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(403).json({ message: "Invalid Token" });
+  }
+};
+
+module.exports = {
+  generateToken,
+  verifyToken,
+};

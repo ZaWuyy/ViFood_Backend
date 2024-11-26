@@ -14,6 +14,10 @@ const orderDetailSchema = new mongoose.Schema({
   note: { 
     type: String 
   }, // Ghi chú
+  discount_unit: { 
+    type: Number, 
+    default: 0 
+  }, // Giảm giá mỗi sản phẩm
   price_per_unit: { 
     type: Number, 
     required: true 

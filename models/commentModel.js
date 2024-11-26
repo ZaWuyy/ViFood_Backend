@@ -2,12 +2,12 @@ import mongoose from 'mongoose';
 
 
 const commentSchema = new Schema({
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',  // Liên kết đến model User
     required: true,
   },
-  productId: {
+  product: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',  // Liên kết đến model Product
     required: true,
@@ -17,10 +17,12 @@ const commentSchema = new Schema({
     required: true,
     maxlength: 1000,  // Giới hạn độ dài của bình luận
   },
+  images:[String],  // Mảng chứa đường dẫn ảnh của bình luận
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  reply: [commentSchema]  // Liên kết đến chính model Comment
 });
 
 const Comment = mongoose.model('Comment', commentSchema);

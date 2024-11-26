@@ -1,17 +1,17 @@
 import mongoose from 'mongoose';
 
 const ratingSchema = new Schema({
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',  // Liên kết đến model User
     required: true,
   },
-  productId: {
+  product: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',  // Liên kết đến model Product
     required: true,
   },
-  rating: {
+  value: {
     type: Number,
     required: true,
     min: 1,  // Điểm đánh giá tối thiểu
@@ -21,11 +21,15 @@ const ratingSchema = new Schema({
     type: String,
     maxlength: 500,  // Giới hạn độ dài của bình luận
   },
+  images: [String],  // Mảng chứa các đường dẫn ảnh
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+ratingSchema.index({ user: 1, product: 1 }, { unique: true });
+
 
 const Rating = mongoose.model('Rating', ratingSchema);
 

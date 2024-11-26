@@ -12,8 +12,8 @@ const productVariantSchema = new mongoose.Schema({
   },
   images: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Image', // Liên kết với Image model
+      type: String,
+      required: true, // Ảnh sản phẩm
     },
   ],
   quantity: {

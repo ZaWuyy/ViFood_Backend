@@ -1,11 +1,16 @@
 import express from 'express';
-import { createRating, getRatingsByProduct, deleteRating } from '../controllers/ratingController';
+import { verifyToken } from '../middleware/auth';
+import { createRating, getAllRatings, getSpecificRatingbyId, getRatingsbyUser,getRatingsByProduct, updateRating, deleteRating } from '../controllers/ratingController';
 
 const router = express.Router();
 
 // Routes cho Rating
-router.post('/', createRating);  // Tạo rating
-router.get('/product/:productId', getRatingsByProduct); // Lấy rating theo sản phẩm
-router.delete('/:ratingId', deleteRating);  // Xóa rating
+router.post('/', verifyToken, createRating);  // Tạo rating
+router.get('/user', verifyToken, getRatingsbyUser);  // Lấy tất cả rating của user
+router.get('/product/:productId', getRatingsByProduct);  // Lấy tất cả rating của sản phẩm
+router.get('/', getAllRatings);  // Lấy tất cả rating 
+router.get('/:id', getSpecificRatingbyId);  // Lấy rating theo id
+router.put('/:id', verifyToken, updateRating);  // Cập nhật rating
+router.delete('/:id', verifyToken, deleteRating);  // Xóa rating
 
 export default router;
