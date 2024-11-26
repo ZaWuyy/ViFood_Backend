@@ -24,33 +24,35 @@ const addFood = async(req,res) => {
 }
 
     //all food list
-    const listFood = async (req, res) => {
-        try {
-            const { sortBy, search } = req.query; // Nhận kiểu sắp xếp và từ khóa tìm kiếm từ query params
-            const query = {};
-    
-            // Nếu có từ khóa tìm kiếm, thêm vào query
-            if (search) {
-                query.name = { $regex: search, $options: 'i' }; // Tìm kiếm không phân biệt chữ hoa chữ thường
-            }
-    
-            const foods = await foodModel.find(query); // Lấy danh sách thực phẩm theo query
-    
-            // Sắp xếp danh sách thực phẩm theo kiểu được yêu cầu
-            if (sortBy === "name") {
-                foods.sort((a, b) => a.name.localeCompare(b.name));
-            } else if (sortBy === "price") {
-                foods.sort((a, b) => a.price - b.price);
-            } else if (sortBy === "category") {
-                foods.sort((a, b) => a.category.localeCompare(b.category));
-            }
-    
-            res.json({ success: true, data: foods });
-        } catch (error) {
-            console.log(error);
-            res.json({ success: false, message: "Error!" });
+   const listFood = async (req, res) => {
+    try {
+        const { sortBy, search } = req.query; // Nhận kiểu sắp xếp và từ khóa tìm kiếm từ query params
+        const query = {}; // Khởi tạo query
+
+        // Nếu có từ khóa tìm kiếm, thêm vào query
+        if (search) {
+            query.name = { $regex: search, $options: 'i' }; // Tìm kiếm không phân biệt chữ hoa chữ thường
         }
-    };
+
+        const foods = await foodModel.find(query); // Lấy danh sách thực phẩm theo query
+
+        // Sắp xếp danh sách thực phẩm theo kiểu được yêu cầu
+        if (sortBy === "name") {
+            foods.sort((a, b) => a.name.localeCompare(b.name)); // Sắp xếp theo tên
+        } else if (sortBy === "price") {
+            foods.sort((a, b) => a.price - b.price); // Sắp xếp theo giá
+        } else if (sortBy === "category") {
+            foods.sort((a, b) => a.category.localeCompare(b.category)); // Sắp xếp theo category
+        }
+
+        res.json({ success: true, data: foods });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error!" });
+    }
+};
+
+
     //remove food item
 
     const removeFood = async (req, res) => {
@@ -79,10 +81,13 @@ const addFood = async(req,res) => {
                 return res.status(404).json({ success: false, message: "Food not found!" });
             }
     
+            // Nếu có ảnh mới được tải lên, xóa ảnh cũ và thay thế ảnh mới
             if (req.file) {
                 fs.unlinkSync(`uploads/${food.image}`, () => {});
                 food.image = `${req.file.filename}`;
             }
+    
+            // Cập nhật các trường thông tin khác nếu có
             food.name = name || food.name;
             food.price = price || food.price;
             food.description = description || food.description;
@@ -96,17 +101,5 @@ const addFood = async(req,res) => {
             res.json({ success: false, message: "Error updating food!" });
         }
     };
-    const getFoodDetail = async (req, res) => {
-        try {
-            const { id } = req.params;
-            const food = await foodModel.findById(id);
-            if (!food) {
-                return res.status(404).json({ success: false, message: "Food not found!" });
-            }
-            res.json({ success: true, data: food });
-        } catch (error) {
-            console.log(error);
-            res.json({ success: false, message: "Error fetching food detail!" });
-        }
-    };
-export { addFood, listFood, removeFood, updateFood, getFoodDetail}
+    
+export { addFood, listFood, removeFood, updateFood }
