@@ -1,5 +1,6 @@
-import { dotenv } from "dotenv";
+import dotenv  from "dotenv";
 dotenv.config();
+import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -9,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async (to, subject, html) => {
+export const sendEmail = async (to, subject, html) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
@@ -20,4 +21,5 @@ const sendEmail = async (to, subject, html) => {
   return transporter.sendMail(mailOptions);
 };
 
-module.exports = sendEmail;
+
+export default sendEmail;

@@ -1,13 +1,12 @@
 import userModel from '../models/userModel.js';
 import productModel from '../models/productModel.js';
 import productVariantModel from '../models/productVariantModel.js';
-import { verifyToken } from '../middleware/auth.js'; // Import your authentication middleware
 
 /**
  * **Add Item to Cart**
  * Adds a product variant to the user's cart or increments the quantity if it already exists.
  */
-const addToCart = async (req, res) => {
+export const addToCart = async (req, res) => {
     try {
         const { itemId } = req.body; // `itemId` refers to the ProductVariant ID
 
@@ -56,7 +55,7 @@ const addToCart = async (req, res) => {
  * **Remove Item from Cart**
  * Decrements the quantity of a product variant in the user's cart or removes it entirely if the quantity reaches zero.
  */
-const removeFromCart = async (req, res) => {
+export const removeFromCart = async (req, res) => {
     try {
         const { itemId } = req.body; // `itemId` refers to the ProductVariant ID
 
@@ -100,7 +99,7 @@ const removeFromCart = async (req, res) => {
  * **Get User Cart Data**
  * Retrieves the current state of the user's cart with detailed product variant information, including percentDiscount.
  */
-const getCart = async (req, res) => {
+export const getCart = async (req, res) => {
     try {
         const userId = req.user.id; // Obtained from verifyToken middleware
 
@@ -160,4 +159,4 @@ const getCart = async (req, res) => {
     }
 };
 
-export { addToCart, removeFromCart, getCart };
+export default { addToCart, removeFromCart, getCart };

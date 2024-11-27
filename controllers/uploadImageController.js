@@ -82,3 +82,5 @@ export const updateImage = async (req, res) => {
     res.status(500).json({ message: `Failed to update image: ${error.message}` });
   }
 };
+
+export default { uploadImage, uploadImages, getImageUrl, deleteImage, updateImage };

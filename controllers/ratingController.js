@@ -1,10 +1,10 @@
 
-import ratingModel from '../models/ratingModel';  // Import mô hình Rating
-import productModel from '../models/productModel'; // Import mô hình Product (để kiểm tra sản phẩm có tồn tại không)
-import { uploadImage, deleteImage } from '../controllers/uploadImageController';
+import ratingModel from '../models/ratingModel.js';  // Import mô hình Rating
+import productModel from '../models/productModel.js'; // Import mô hình Product (để kiểm tra sản phẩm có tồn tại không)
+import { uploadImage, deleteImage } from '../controllers/uploadImageController.js';
 
 // updateAverageRating: Cập nhật rating trung bình của sản phẩm
-const updateProductAverageRating = async (productId) => {
+export const updateProductAverageRating = async (productId) => {
   try {
     const ratings = await ratingModel.find({ product: productId });
     if (ratings.length === 0) {
@@ -20,7 +20,7 @@ const updateProductAverageRating = async (productId) => {
 };
 
 // createRating: Tạo mới rating
-const createRating = async (req, res) => {
+export const createRating = async (req, res) => {
   uploadImage(req, res, async (err) => {
     if (err) {
       return res.status(500).json({ message: `Failed to upload image: ${err.message}` });
@@ -64,7 +64,7 @@ const createRating = async (req, res) => {
 };
 
 // get all ratings 
-const getAllRatings = async (req, res) => {
+export const getAllRatings = async (req, res) => {
   try {
     const ratings = await ratingModel.find().populate("user", "username");
     res.json(ratings);
@@ -74,7 +74,7 @@ const getAllRatings = async (req, res) => {
 };
 
 // get a specific rating by id
-const getSpecificRatingbyId = async (req, res) => {
+export const getSpecificRatingbyId = async (req, res) => {
   try {
     const rating = await ratingModel.findById(req.params.id).populate("user", "username");
     if (!rating) {
@@ -87,7 +87,7 @@ const getSpecificRatingbyId = async (req, res) => {
 };
 
 // Get ratings by user
-const getRatingsbyUser = async (req, res) => {
+export const getRatingsbyUser = async (req, res) => {
   const userId = req.user.id;
 
   try {
@@ -99,7 +99,7 @@ const getRatingsbyUser = async (req, res) => {
 };
 
 // get all ratings of a product
-const getRatingsByProduct = async (req, res) => {
+export const getRatingsByProduct = async (req, res) => {
   const { productId } = req.params;
   try {
     // Lấy tất cả rating của sản phẩm
@@ -117,7 +117,7 @@ const getRatingsByProduct = async (req, res) => {
 };
 
 // updateRating: Cập nhật rating
-const updateRating = async (req, res) => {
+export const updateRating = async (req, res) => {
   uploadImage(req, res, async (err) => {
     if (err) {
       return res.status(500).json({ message: `Failed to upload image: ${err.message}` });
@@ -159,7 +159,7 @@ const updateRating = async (req, res) => {
 };
 
 // deleteRating: Xóa rating
-const deleteRating = async (req, res) => {
+export const deleteRating = async (req, res) => {
   const userId = req.user.id;
   const isAdmin = req.user.role === "admin";
   if ( !isAdmin || rating.user.toString() !== userId) {

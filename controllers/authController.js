@@ -1,13 +1,10 @@
-const express = require("express");
-const sendEmail = require("../utils/emailService");
-const { generateToken } = require("../middleware/auth");
-const crypto = require("crypto");
-const userModel = require("../models/userModel");
-
-const router = express.Router();
+import sendEmail from "../utils/emailService.js";
+import generateToken from "../middleware/auth.js";
+import crypto from "crypto";
+import userModel from "../models/userModel.js";
 
 // register
-const register = async (req, res) => {
+export const register = async (req, res) => {
   const { username, email, password } = req.body;
   try {
     const existingUser = await userModel.findOne({ email });
@@ -32,8 +29,7 @@ const register = async (req, res) => {
 };
 
 // login
-const login =
-router.post("/login", async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -47,11 +43,11 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
-});
+};
 
 
 // forgot password
-const forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   const { email } = req.body;
   const user = await userModel.findOne({ email });
 
@@ -75,7 +71,7 @@ const forgotPassword = async (req, res) => {
 };
 
 // reset password
-const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { newPassword } = req.body;
 

@@ -1,11 +1,16 @@
 import express from 'express';
-import { uploadImage, getImageUrl, deleteImage, updateImage } from '../controllers/uploadImageController';
+import { uploadImage, uploadImages, getImageUrl, deleteImage, updateImage } from '../controllers/uploadImageController.js';
 
 const router = express.Router();
 
 // Route to upload an image
 router.post('/upload', uploadImage, (req, res) => {
   res.status(200).json({ message: 'Image uploaded successfully', imageUrl: req.file.path });
+});
+
+// Route to upload multiple images
+router.post('/upload-multiple', uploadImages, (req, res) => {
+  res.status(200).json({ message: 'Images uploaded successfully', imageUrls: req.files.map(file => file.path) });
 });
 
 // Route to get an image URL

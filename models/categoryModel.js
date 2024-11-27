@@ -37,9 +37,10 @@ const categorySchema = new mongoose.Schema({
 });
 
 // Middleware tự động cập nhật `updatedAt`
-productVariantSchema.pre('save', function (next) {
+categorySchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-export default mongoose.model('Category', categorySchema);
+const Category = mongoose.model('Category', categorySchema);
+export default Category;

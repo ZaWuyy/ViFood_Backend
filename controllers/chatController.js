@@ -1,5 +1,5 @@
 // controllers/chatController.js
-import Chat from '../models/Chat.js';
+import Chat from '../models/chatModel.js';
 import { uploadImages, deleteImage } from '../controllers/uploadImageController.js';
 
 /**
@@ -134,3 +134,5 @@ export const deleteMessageImage = async (req, res) => {
     res.status(500).json({ message: 'Server error deleting image.', error });
   }
 };
+
+export default { getChats, getOrCreateChat, sendMessage, deleteMessageImage };

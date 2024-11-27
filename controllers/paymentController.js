@@ -1,6 +1,6 @@
 // controllers/paymentController.js
-import { createPayment, paymentReturn } from '../utils/paymentService';
-import Payment from '../models/paymentModel';
+import { createPayment, paymentReturn as servicePaymentReturn } from '../utils/paymentService.js';
+import Payment from '../models/paymentModel.js';
 
 export const requestPayment = async (req, res) => {
   try {
@@ -43,15 +43,15 @@ export const paymentReturn = async (req, res) => {
   }
 };
 
-// controllers/paymentController.js
+
 export const getPaymentHistory = async (req, res) => {
-    try {
-      const payments = await Payment.find().populate('order');
-      res.json(payments);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to retrieve payment history', error: error.message });
-    }
-  };
+  try {
+    const payments = await Payment.find().populate('order');
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve payment history', error: error.message });
+  }
+};
   
 // Xác thực hash để đảm bảo tính toàn vẹn
 const verifyPaymentReturn = (queryParams) => {
@@ -60,3 +60,5 @@ const verifyPaymentReturn = (queryParams) => {
   const calculatedHash = generateVnpayHash(queryParams);
   return calculatedHash === secureHash;
 };
+
+export default { requestPayment, paymentReturn, getPaymentHistory };

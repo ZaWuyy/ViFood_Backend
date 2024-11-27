@@ -6,7 +6,7 @@ import { uploadImage, deleteImage } from "../controllers/uploadImageController.j
 /**
  * **Fetch Profile**
  */
-const fetchProfile = async (req, res) => {
+export const fetchProfile = async (req, res) => {
     try {
         const user = await userModel.findById(req.user.id).select("-password -resetPasswordToken -resetPasswordExpires");
 
@@ -24,7 +24,7 @@ const fetchProfile = async (req, res) => {
  * **Update Profile**
  * Handles avatar image upload and updates user profile information.
  */
-const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
     uploadImage(req, res, async (err) => {
         if (err) {
             return res.status(500).json({ message: `Failed to upload image: ${err.message}` });
@@ -65,7 +65,7 @@ const updateProfile = async (req, res) => {
 /**
  * **Send Verification Email**
  */
-const sendVerificationEmail = async (req, res) => {
+export const sendVerificationEmail = async (req, res) => {
     const { newEmail } = req.body;
     const user = await userModel.findById(req.user.id);
 
@@ -89,7 +89,7 @@ const sendVerificationEmail = async (req, res) => {
 /**
  * **Verify Email**
  */
-const verifyEmail = async (req, res) => {
+export const verifyEmail = async (req, res) => {
     const { token, email } = req.body;
 
     try {
@@ -112,7 +112,7 @@ const verifyEmail = async (req, res) => {
 /**
  * **Create a New User**
  */
-const createUser = async (req, res) => {
+export const createUser = async (req, res) => {
     const { username, email, password } = req.body;
     if (req.user.role !== "admin") {
         return res.status(403).json({ success: false, message: "Unauthorized." });
@@ -135,7 +135,7 @@ const createUser = async (req, res) => {
 /**
  * **Update a User**
  */
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
     if (req.user.role !== "admin" && req.user.id !== req.params.id) {
         return res.status(403).json({ success: false, message: "Unauthorized." });
     }
@@ -156,7 +156,7 @@ const updateUser = async (req, res) => {
  * **Delete a User**
  * Deletes the user's avatar from Cloudinary before removing the user from the database.
  */
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
     if (req.user.role !== "admin" && req.user.id !== req.params.id) {
         return res.status(403).json({ success: false, message: "Unauthorized." });
     }
@@ -183,7 +183,7 @@ const deleteUser = async (req, res) => {
 /**
  * **Add a Voucher to Saved Vouchers**
  */
-const addVoucher = async (req, res) => {
+export const addVoucher = async (req, res) => {
     const { voucherId } = req.body;
     try {
         const user = await userModel.findById(req.user.id);
@@ -209,7 +209,7 @@ const addVoucher = async (req, res) => {
 /**
  * **Remove a Voucher from Saved Vouchers**
  */
-const removeVoucher = async (req, res) => {
+export const removeVoucher = async (req, res) => {
     const { voucherId } = req.body;
     try {
         const user = await userModel.findById(req.user.id);
@@ -234,7 +234,7 @@ const removeVoucher = async (req, res) => {
 /**
  * **Add a Favorite Product**
  */
-const addFavoriteProduct = async (req, res) => {
+export const addFavoriteProduct = async (req, res) => {
     const { productId } = req.body;
     try {
         const user = await userModel.findById(req.user.id);
@@ -260,7 +260,7 @@ const addFavoriteProduct = async (req, res) => {
 /**
  * **Remove a Favorite Product**
  */
-const removeFavoriteProduct = async (req, res) => {
+export const removeFavoriteProduct = async (req, res) => {
     const { productId } = req.body;
     try {
         const user = await userModel.findById(req.user.id);
@@ -278,6 +278,30 @@ const removeFavoriteProduct = async (req, res) => {
         res.json({ success: true, message: "Favorite product removed successfully.", favoriteProducts: user.favoriteProducts });
     } catch (error) {
         console.error(error);
+        res.status(500).json({ message: `Server error: ${error.message}` });
+    }
+};
+
+export const getUser = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.params.id).select("-password -resetPasswordToken -resetPasswordExpires");
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: `Server error: ${error.message}` });
+    }
+};
+
+export const getUsers = async (req, res) => {
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Unauthorized." });
+    }
+    try {
+        const users = await userModel.find().select("-password -resetPasswordToken -resetPasswordExpires");
+        res.json(users);
+    } catch (error) {
         res.status(500).json({ message: `Server error: ${error.message}` });
     }
 };

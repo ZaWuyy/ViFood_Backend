@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../middleware/auth'; // Import middleware để xác thực token
+import { verifyToken } from '../middleware/auth.js'; // Import middleware để xác thực token
 import {
   createRating,
   getAllRatings,
@@ -8,8 +8,8 @@ import {
   getRatingsByProduct,
   updateRating,
   deleteRating,
-} from '../controllers/ratingController';
-import { uploadImage } from '../controllers/uploadImageController'; // Import the uploadImage middleware
+} from '../controllers/ratingController.js';
+import { uploadImage } from '../controllers/uploadImageController.js'; // Import the uploadImage middleware
 
 const router = express.Router();
 

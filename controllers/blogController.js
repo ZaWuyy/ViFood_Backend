@@ -1,7 +1,7 @@
 import Blog from '../models/blogModel.js';
 
 // Get all blogs
-const getBlogs = async (req, res) => {
+export const getBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find().populate('categories').populate('images');
     res.status(200).json(blogs);
@@ -11,7 +11,7 @@ const getBlogs = async (req, res) => {
 };
 
 // Get a single blog by ID
-const getBlogById = async (req, res) => {
+export const getBlogById = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id).populate('categories').populate('images');
     if (!blog) {
@@ -24,7 +24,7 @@ const getBlogById = async (req, res) => {
 };
 
 // Create a new blog
-const createBlog = async (req, res) => {
+export const createBlog = async (req, res) => {
   const isAdmin = req.user.role === 'admin';
   const userId = req.user._id;
   const { title, content, categories, images, status } = req.body;
@@ -48,7 +48,7 @@ const createBlog = async (req, res) => {
 };
 
 // Update an existing blog
-const updateBlog = async (req, res) => {
+export const updateBlog = async (req, res) => {
   const { title, content, categories, images, status } = req.body;
   const userId = req.user._id;
   const isAdmin = req.user.role === 'admin';
@@ -71,7 +71,7 @@ const updateBlog = async (req, res) => {
 };
 
 // Delete a blog
-const deleteBlog = async (req, res) => {
+export const deleteBlog = async (req, res) => {
   const userId = req.user._id;
   const isAdmin = req.user.role === 'admin';
   if ( userId !== req.blog.user.toString() || !isAdmin ) {
@@ -88,4 +88,4 @@ const deleteBlog = async (req, res) => {
   }
 };
 
-export { getBlogs, getBlogById, createBlog, updateBlog, deleteBlog };
+export default { getBlogs, getBlogById, createBlog, updateBlog, deleteBlog };

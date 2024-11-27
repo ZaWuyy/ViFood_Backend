@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 
-const commentSchema = new Schema({
+const commentSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',  // Liên kết đến model User
@@ -29,7 +29,7 @@ const commentSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  reply: [commentSchema]  // Liên kết đến chính model Comment
+ 
 });
 
 const Comment = mongoose.model('Comment', commentSchema);

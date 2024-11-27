@@ -66,3 +66,5 @@ export const verifyPaymentReturn = (queryParams) => {
   const calculatedHash = generateVnpayHash(queryParams);
   return calculatedHash === secureHash;
 };
+
+export default { createVnpayPaymentRequest, verifyPaymentReturn };

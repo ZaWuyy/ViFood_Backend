@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const ratingSchema = new Schema({
+const ratingSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',  // Liên kết đến model User

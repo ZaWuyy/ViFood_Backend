@@ -10,7 +10,7 @@ dotenv.config();
 /**
  * Hàm tìm hoặc tạo cuộc trò chuyện giữa hai người dùng
  */
-const getOrCreateChat = async (user1Id, user2Id) => {
+export const getOrCreateChat = async (user1Id, user2Id) => {
   try {
     let chat = await Chat.findOne({
       participants: { $all: [user1Id, user2Id] },

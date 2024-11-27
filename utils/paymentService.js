@@ -1,8 +1,8 @@
 // services/paymentService.js
-import Payment from '../models/paymentModel';
-import { createVnpayPaymentRequest, verifyPaymentReturn } from './vnpayService';
-import Order from '../models/orderModel';
-import Voucher from '../models/voucherModel';
+import Payment from '../models/paymentModel.js';
+import { createVnpayPaymentRequest, verifyPaymentReturn } from './vnpayService.js';
+import Order from '../models/orderModel.js';
+import Voucher from '../models/voucherModel.js';
 
 
 // Tạo thanh toán mới và yêu cầu thanh toán VNPay
@@ -79,3 +79,5 @@ export const paymentReturn = async (queryParams) => {
 
   return payment;
 };
+
+export default { createPayment, paymentReturn };

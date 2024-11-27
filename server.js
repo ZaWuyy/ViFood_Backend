@@ -1,8 +1,10 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import http from 'http';
 
-import { connectDB } from './config/db.js';
+
+import  connectDB  from './config/db.js';
 import { verifyToken } from './middleware/auth.js';
 
 import authRoute from './routes/authRoute.js';
@@ -24,9 +26,10 @@ import voucherRoute from './routes/voucherRoute.js';
 
 import initWebsocket from './utils/websocket.js';
 
+
 dotenv.config();
 const app = express();
-const server = require('http').createServer(app);
+const server = http.createServer(app);
 
 // Initalize websocket
 initWebsocket(server);

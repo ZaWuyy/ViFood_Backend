@@ -119,3 +119,5 @@ export const deleteProductVariant = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error deleting product variant.' });
   }
 };
+
+export default { getProductVariants, createProductVariant, updateProductVariant, deleteProductVariant };

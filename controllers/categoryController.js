@@ -4,7 +4,7 @@ import { uploadImage, deleteImage } from '../controllers/uploadImageController.j
 /**
  * **1. Lấy danh sách category với tìm kiếm và lọc**
  */
-const getCategories = async (req, res) => {
+export const getCategories = async (req, res) => {
   try {
     const { name, active } = req.query; // Lấy thông tin tìm kiếm và lọc từ query string
 
@@ -22,7 +22,7 @@ const getCategories = async (req, res) => {
 /**
  * **2. Tạo mới category**
  */
-const createCategory = async (req, res) => {
+export const createCategory = async (req, res) => {
   uploadImage(req, res, async (err) => {
     if (err) {
       return res.status(500).json({ message: `Failed to upload image: ${err.message}` });
@@ -48,7 +48,7 @@ const createCategory = async (req, res) => {
 /**
  * **3. Cập nhật category**
  */
-const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res) => {
   uploadImage(req, res, async (err) => {
     if (err) {
       return res.status(500).json({ message: `Failed to upload image: ${err.message}` });
@@ -83,7 +83,7 @@ const updateCategory = async (req, res) => {
 /**
  * **4. Xóa category**
  */
-const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     if (!category) return res.status(404).json({ message: 'Không tìm thấy category!' });
