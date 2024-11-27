@@ -1,7 +1,7 @@
 
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const userSchema = new mongoose.Schema({
   firstname: { type: String },
@@ -12,9 +12,20 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ["user",  "admin"], default: "user" },
   gender: { type: String},
-  avatarUrl: { type: String },
+  avatarUrl: { 
+    public_id: {
+      type: String,
+     // Public ID from Cloudinary
+    },
+    url: {
+      type: String,
+     // URL of the uploaded image
+    },
+   },
   birthdate: { type: Date },
   cartData: { type: Object, default:{} },
+  vouchers: [{ type: mongoose.Schema.Types.ObjectId, ref: "Voucher" }],
+  products: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   orderedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
   createdAt: { type: Date, default: Date.now },
   resetPasswordToken: { type: String },

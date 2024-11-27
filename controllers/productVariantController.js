@@ -1,37 +1,39 @@
-import ProductVariant from '../models/ProductVariant.js';
-import cloudinary from '../config/cloudinaryConfig.js';
+// productVariantController.js
+import ProductVariant from '../models/productVariantModel.js';
+import { deleteImage } from '../controllers/uploadImageController.js';
 
 /**
- * **1. Lấy danh sách product variants**
+ * **1. Get Product Variants**
  */
 export const getProductVariants = async (req, res) => {
   try {
     const { active } = req.query;
 
     const query = {};
-    if (active !== undefined) query.active = active === 'true'; // Lọc theo trạng thái active
+    if (active !== undefined) query.active = active === 'true'; // Filter by active status
 
-    const variants = await ProductVariant.find(query).populate('images');
-    res.json(variants);
+    const variants = await ProductVariant.find(query);
+    res.json({ success: true, variants });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching product variants:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching product variants.' });
   }
 };
 
 /**
- * **2. Tạo mới product variant**
+ * **2. Create New Product Variant**
  */
 export const createProductVariant = async (req, res) => {
   try {
     const { size, price, quantity, percentDiscount, active } = req.body;
 
-    // Upload ảnh lên Cloudinary
-    const images = [];
+    // Assign uploaded images
+    let images = [];
     if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(file.path, { folder: 'product_variants' });
-        images.push({ public_id: result.public_id, url: result.secure_url });
-      }
+      images = req.files.map(file => ({
+        public_id: file.filename,
+        url: file.path,
+      }));
     }
 
     const variant = new ProductVariant({
@@ -44,66 +46,76 @@ export const createProductVariant = async (req, res) => {
     });
 
     const newVariant = await variant.save();
-    res.status(201).json(newVariant);
+    res.status(201).json({ success: true, variant: newVariant });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating product variant:', error);
+    res.status(500).json({ success: false, message: 'Server error creating product variant.' });
   }
 };
 
 /**
- * **3. Cập nhật product variant**
+ * **3. Update Product Variant**
  */
 export const updateProductVariant = async (req, res) => {
   try {
-    const variant = await ProductVariant.findById(req.params.id).populate('images');
-    if (!variant) return res.status(404).json({ message: 'Không tìm thấy variant!' });
+    const variant = await ProductVariant.findById(req.params.id);
+    if (!variant) {
+      return res.status(404).json({ success: false, message: 'Variant not found!' });
+    }
 
     const { size, price, quantity, percentDiscount, active } = req.body;
 
     variant.size = size || variant.size;
     variant.price = price || variant.price;
     variant.quantity = quantity || variant.quantity;
-    variant.percentDiscount = percentDiscount || variant.percentDiscount;
+    variant.percentDiscount = percentDiscount !== undefined ? percentDiscount : variant.percentDiscount;
     variant.active = active !== undefined ? active : variant.active;
 
-    // Nếu có ảnh mới, xóa ảnh cũ và upload ảnh mới
+    // If there are new images, delete the old ones and assign new images
     if (req.files && req.files.length > 0) {
-      for (const img of variant.images) {
-        await cloudinary.uploader.destroy(img.public_id); // Xóa ảnh cũ trên Cloudinary
+      // Delete old images from Cloudinary
+      if (variant.images && variant.images.length > 0) {
+        for (const img of variant.images) {
+          await deleteImage(img.public_id);
+        }
       }
 
-      const newImages = [];
-      for (const file of req.files) {
-        const result = await cloudinary.uploader.upload(file.path, { folder: 'product_variants' });
-        newImages.push({ public_id: result.public_id, url: result.secure_url });
-      }
-
-      variant.images = newImages;
+      // Assign new images
+      variant.images = req.files.map(file => ({
+        public_id: file.filename,
+        url: file.path,
+      }));
     }
 
     const updatedVariant = await variant.save();
-    res.json(updatedVariant);
+    res.json({ success: true, variant: updatedVariant });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error updating product variant:', error);
+    res.status(500).json({ success: false, message: 'Server error updating product variant.' });
   }
 };
 
 /**
- * **4. Xóa product variant**
+ * **4. Delete Product Variant**
  */
 export const deleteProductVariant = async (req, res) => {
   try {
-    const variant = await ProductVariant.findById(req.params.id).populate('images');
-    if (!variant) return res.status(404).json({ message: 'Không tìm thấy variant!' });
+    const variant = await ProductVariant.findById(req.params.id);
+    if (!variant) {
+      return res.status(404).json({ success: false, message: 'Variant not found!' });
+    }
 
-    // Xóa ảnh trên Cloudinary
-    for (const img of variant.images) {
-      await cloudinary.uploader.destroy(img.public_id);
+    // Delete images from Cloudinary
+    if (variant.images && variant.images.length > 0) {
+      for (const img of variant.images) {
+        await deleteImage(img.public_id);
+      }
     }
 
     await variant.remove();
-    res.json({ message: 'Product variant đã được xóa thành công!' });
+    res.json({ success: true, message: 'Product variant has been successfully deleted!' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error deleting product variant:', error);
+    res.status(500).json({ success: false, message: 'Server error deleting product variant.' });
   }
 };

@@ -21,7 +21,14 @@ const ratingSchema = new Schema({
     type: String,
     maxlength: 500,  // Giới hạn độ dài của bình luận
   },
-  images: [String],  // Mảng chứa các đường dẫn ảnh
+  images: [{
+    public_id: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
+  },],  // Mảng chứa các đường dẫn ảnh
   createdAt: {
     type: Date,
     default: Date.now,

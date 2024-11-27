@@ -1,24 +1,23 @@
+// voucherRoute.js
 import express from 'express';
+import { verifyToken } from '../middleware/auth.js';
 import {
-  getProductVariants,
-  createProductVariant,
-  updateProductVariant,
-  deleteProductVariant,
-} from '../controllers/productVariantController.js';
-import { upload } from '../config/multerConfig.js';
+    createVoucher,
+    getVouchers,
+    getVoucherByCode,
+    updateVoucher,
+    deleteVoucher,
+    getVouchersByUser
+} from '../controllers/voucherController.js';
 
 const router = express.Router();
 
-// Lấy danh sách variants
-router.get('/', getProductVariants);
-
-// Tạo product variant mới (hỗ trợ upload nhiều ảnh)
-router.post('/create', upload.array('images', 5), createProductVariant); // Tối đa 5 ảnh
-
-// Cập nhật product variant
-router.put('/update/:id', upload.array('images', 5), updateProductVariant);
-
-// Xóa product variant
-router.delete('/delete/:id', deleteProductVariant);
+// **Voucher Routes**
+router.post('/', verifyToken, createVoucher);
+router.get('/', verifyToken, getVouchers);
+router.get('/user', verifyToken, getVouchersByUser); // New route to get vouchers by user
+router.get('/:code', verifyToken, getVoucherByCode);
+router.put('/:code', verifyToken, updateVoucher);
+router.delete('/:code', verifyToken, deleteVoucher);
 
 export default router;

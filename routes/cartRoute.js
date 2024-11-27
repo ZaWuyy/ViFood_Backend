@@ -1,11 +1,16 @@
 import express from 'express';
-import { addToCart,removeFromCart, getCart } from '../controllers/cartController.js';
-import authMiddleware from '../middleware/auth.js';
+import { verifyToken } from '../middleware/auth.js'; // Import your authentication middleware
+import { addToCart, removeFromCart, getCart } from '../controllers/cartController.js';
 
-const cartRouter = express.Router();
+const router = express.Router();
 
-cartRouter.post('/add',authMiddleware, addToCart)
-cartRouter.post('/remove',authMiddleware, removeFromCart)
-cartRouter.post('/get', authMiddleware, getCart);
+// Add an item to the cart
+router.post('/add', verifyToken, addToCart);
 
-export default cartRouter;
+// Remove an item from the cart
+router.post('/remove', verifyToken, removeFromCart);
+
+// Get the user's cart
+router.get('/', verifyToken, getCart);
+
+export default router;

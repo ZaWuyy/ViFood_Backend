@@ -1,4 +1,6 @@
+// voucherController.js
 import Voucher from '../models/voucherModel.js';
+import userModel from '../models/userModel.js'; // Import User model
 
 // Tạo voucher mới
 export const createVoucher = async (req, res) => {
@@ -42,7 +44,6 @@ export const createVoucher = async (req, res) => {
     }
 };
 
-
 // Lấy danh sách vouchers có thể lọc
 export const getVouchers = async (req, res) => {
     try {
@@ -77,7 +78,7 @@ export const getVouchers = async (req, res) => {
 export const getVoucherByCode = async (req, res) => {
     try {
         const { code } = req.params;
-        const voucher = await Voucher.findOne({ "_id":`${code}` });
+        const voucher = await Voucher.findOne({ code });
         if (!voucher) {
             return res.status(404).json({ message: 'Voucher not found' });
         }
@@ -105,7 +106,7 @@ export const updateVoucher = async (req, res) => {
         }
 
         const voucher = await Voucher.findOneAndUpdate(
-            { "_id":`${code}` },
+            { code },
             {
                 name,
                 discountType,
@@ -136,8 +137,7 @@ export const updateVoucher = async (req, res) => {
 export const deleteVoucher = async (req, res) => {
     try {
         const { code } = req.params;
-        const voucher = await Voucher.findOneAndDelete({ "_id":`${code}` });
-        console.log(code);
+        const voucher = await Voucher.findOneAndDelete({ code });
         if (!voucher) {
             return res.status(404).json({ message: 'Voucher not found' });
         }
@@ -146,4 +146,32 @@ export const deleteVoucher = async (req, res) => {
         console.error('Error deleting voucher:', error);
         res.status(500).json({ message: 'Server error' });
     }
+};
+
+/**
+ * **Get Vouchers by User**
+ */
+export const getVouchersByUser = async (req, res) => {
+    try {
+        const userId = req.user.id; // Assumes authentication middleware sets req.user.id
+        const user = await userModel.findById(userId).populate('vouchers');
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        res.status(200).json({ success: true, vouchers: user.vouchers });
+    } catch (error) {
+        console.error('Error fetching user vouchers:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export default { 
+    createVoucher, 
+    getVouchers, 
+    getVoucherByCode, 
+    updateVoucher,
+    deleteVoucher,
+    getVouchersByUser
 };

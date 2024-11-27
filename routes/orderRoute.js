@@ -1,16 +1,33 @@
-// routes/orderRoutes.js
+// routes/orderRoute.js
 import express from 'express';
-import {createOrder, getOrder, getAllOrders} from '../controllers/orderController';
+import {
+  createOrder,
+  getAllOrders,
+  getUserOrders,
+  getOrderById,
+  updateOrderStatus,
+  deleteOrder,
+} from '../controllers/orderController.js';
+import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// API tạo đơn hàng mới
-router.post('/create', createOrder);
+// Create Order
+router.post('/', verifyToken, createOrder);
 
-// API lấy thông tin đơn hàng
-router.get('/:orderId', getOrder);
+// Get All Orders (Admin)
+router.get('/', verifyToken, getAllOrders);
 
-// API lấy tất cả đơn hàng của người dùng
-router.get('/', getAllOrders);
+// Get Orders by User
+router.get('/user', verifyToken, getUserOrders);
+
+// Get Order by ID
+router.get('/:id', verifyToken, getOrderById);
+
+// Update Order Status
+router.patch('/:id/status', verifyToken, updateOrderStatus);
+
+//  Delete Order
+router.delete('/:id', verifyToken, deleteOrder);
 
 export default router;

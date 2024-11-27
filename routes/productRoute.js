@@ -1,27 +1,27 @@
+// productRoute.js
 import express from 'express';
+import { verifyToken } from '../middleware/auth.js';
 import {
   getProducts,
+  getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
-  getProductById,
+  getProductsByUser,
 } from '../controllers/productController.js';
 
 const router = express.Router();
 
-// Lấy danh sách tất cả products
+// **Public Routes**
 router.get('/', getProducts);
-
-// Lấy thông tin product theo ID
 router.get('/:id', getProductById);
 
-// Tạo mới product
-router.post('/create', createProduct);
+// **Protected Routes**
+router.post('/', verifyToken, createProduct);
+router.put('/:id', verifyToken, updateProduct);
+router.delete('/:id', verifyToken, deleteProduct);
 
-// Cập nhật product theo ID
-router.put('/update/:id', updateProduct);
-
-// Xóa product theo ID
-router.delete('/delete/:id', deleteProduct);
+// **User-Specific Routes**
+router.get('/user/', verifyToken, getProductsByUser);
 
 export default router;

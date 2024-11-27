@@ -1,5 +1,5 @@
 import express from 'express';
-import { uploadImage, deleteImage, updateImageHandler } from '../controllers/imageController.js';
+import { uploadImage, deleteImage, updateImageHandler } from '../controllers/uploadImageController.js';
 import { upload } from '../config/multerConfig.js';
 
 const router = express.Router();

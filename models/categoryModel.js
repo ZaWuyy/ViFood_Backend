@@ -12,7 +12,14 @@ const categorySchema = new mongoose.Schema({
     trim: true, // Removes extra spaces
   },
   image: {
-    String, // Image is mandatory
+    public_id: {
+      type: String,
+      required: true, // Public ID from Cloudinary
+    },
+    url: {
+      type: String,
+      required: true, // URL of the uploaded image
+    },
   },
 
   active: {

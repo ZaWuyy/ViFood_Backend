@@ -17,7 +17,14 @@ const commentSchema = new Schema({
     required: true,
     maxlength: 1000,  // Giới hạn độ dài của bình luận
   },
-  images:[String],  // Mảng chứa đường dẫn ảnh của bình luận
+  images:[{
+    public_id: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
+  },],  // Mảng chứa đường dẫn ảnh của bình luận
   createdAt: {
     type: Date,
     default: Date.now,

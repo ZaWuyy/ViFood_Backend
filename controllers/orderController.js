@@ -1,106 +1,227 @@
 // controllers/orderController.js
-import Order from '../models/Order';
-import OrderDetail from '../models/OrderDetail';
-import Product from '../models/Product';
-import PaymentService from '../services/paymentService';
+import Order from '../models/orderModel.js';
+import OrderDetail from '../models/orderDetailModel.js';
 
-class OrderController {
-  // Tạo một đơn hàng mới
-  async createOrder(req, res) {
-    const { userId, orderDetails, voucherCode } = req.body;
+/**
+ * **Create Order**
+ */
+export const createOrder = async (req, res) => {
+  const { total_price, note, address, phone, order_details, method } = req.body;
 
-    try {
-      // Tính toán tổng giá trị đơn hàng
-      let totalPrice = 0;
-      const orderDetailsArray = [];
-
-      // Xử lý mỗi chi tiết đơn hàng (sản phẩm, số lượng, ghi chú, tổng giá)
-      for (let detail of orderDetails) {
-        const { productId, variantId, quantity, note } = detail;
-
-        // Lấy Product từ DB
-        const product = await Product.findById(productId).populate('variants');
-
-        // Kiểm tra xem Product có tồn tại không
-        if (!product) {
-          return res.status(404).json({ message: 'Product not found' });
-        }
-
-        // Lấy Variant từ Product (hoặc theo điều kiện bạn muốn)
-        const variant = product.variants.find(v => v._id.toString() === variantId);
-
-        if (!variant) {
-          return res.status(404).json({ message: 'Product variant not found' });
-        }
-
-        // Tính giá cho chi tiết đơn hàng
-        const totalPriceDetail = variant.price * quantity;
-
-        orderDetailsArray.push({
-          product: productId,
-          variant: variantId,
-          quantity,
-          note,
-          total_price: totalPriceDetail,
-          price_per_unit: variant.price,
-        });
-
-        totalPrice += totalPriceDetail;
-      }
-
-      // Tạo OrderDetail cho mỗi chi tiết trong đơn hàng
-      const orderDetailRecords = await OrderDetail.insertMany(orderDetailsArray);
-
-      // Tạo đơn hàng (Order)
-      const order = new Order({
-        user: userId,
-        order_detail: orderDetailRecords.map((detail) => detail._id),
-        total_price: totalPrice,
-        status: 'pending', // Trạng thái ban đầu là pending
-      });
-
-      await order.save();
-
-      // Tạo thanh toán (Payment)
-      const payment = await PaymentService.createPayment(order._id, totalPrice, voucherCode);
-
-      res.status(201).json({
-        order,
-        payment,
-      });
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+  if (!total_price || !address || !phone || !order_details || !Array.isArray(order_details) || !method) {
+    return res.status(400).json({ success: false, message: 'All required fields must be provided.' });
   }
 
-  // Lấy thông tin chi tiết đơn hàng
-  async getOrder(req, res) {
-    const { orderId } = req.params;
+  try {
+    // Create OrderDetails
+    const createdOrderDetails = await OrderDetail.insertMany(order_details);
 
-    try {
-      const order = await Order.findById(orderId).populate('order_detail').populate('user');
-      if (!order) {
-        return res.status(404).json({ message: 'Order not found' });
-      }
-      res.status(200).json(order);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
+    // Create Order
+    const order = new Order({
+      user: req.user.id,
+      total_price,
+      note,
+      address,
+      phone,
+      order_details: createdOrderDetails.map(detail => detail._id),
+      method,
+    });
+
+    const savedOrder = await order.save();
+    res.status(201).json({ success: true, message: 'Order created successfully.', order: savedOrder });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ success: false, message: 'Server error creating order.', error });
   }
+};
 
-  // Lấy tất cả đơn hàng của người dùng
-  async getAllOrders(req, res) {
+/**
+ * **Get All Orders (Admin)**
+ */
+export const getAllOrders = async (req, res) => {
+  const isAdmin = req.user.role === 'admin';
+  if (!isAdmin) {
+    return res.status(403).json({ success: false, message: 'Unauthorized to get all orders' });
+  };
+
+  try {
+    const { status, method, dateFrom, dateTo, sortBy, sortOrder, page = 1, limit = 10 } = req.query;
+
+    const query = {};
+    if (status) query.status = status;
+    if (method) query.method = method;
+    if (dateFrom || dateTo) {
+      query.created_date = {};
+      if (dateFrom) query.created_date.$gte = new Date(dateFrom);
+      if (dateTo) query.created_date.$lte = new Date(dateTo);
+    }
+
+    let sort = {};
+    if (sortBy) {
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    } else {
+      sort['created_date'] = -1;
+    }
+
+    const orders = await Order.find(query)
+      .populate('user', 'username email')
+      .populate({
+        path: 'order_details',
+        populate: { path: 'product variant' }, // Adjust paths as per OrderDetail schema
+      })
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await Order.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
+      orders,
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching orders.', error });
+  }
+};
+
+/**
+ * **Get User Orders**
+ */
+export const getUserOrders = async (req, res) => {
+  try {
     const userId = req.user.id;
+    const { status, sortBy, sortOrder, page = 1, limit = 10 } = req.query;
 
-    try {
-      const orders = await Order.find({ user: userId })
-        .populate('order_detail')
-        .populate('user');
-      res.status(200).json(orders);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
+    const query = { user: userId };
+    if (status) query.status = status;
+
+    let sort = {};
+    if (sortBy) {
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    } else {
+      sort['created_date'] = -1;
     }
-  }
-}
 
-export default new OrderController();
+    const orders = await Order.find(query)
+      .populate({
+        path: 'order_details',
+        populate: { path: 'product variant' }, // Adjust paths as per OrderDetail schema
+      })
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await Order.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
+      orders,
+    });
+  } catch (error) {
+    console.error('Error fetching user orders:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching your orders.', error });
+  }
+};
+
+/**
+ * **Get Order By ID**
+ */
+export const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'username email')
+      .populate({
+        path: 'order_details',
+        populate: { path: 'product variant' }, // Adjust paths as per OrderDetail schema
+      });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    // Check if the user is the owner or an admin
+    if (order.user._id.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Unauthorized to view this order.' });
+    }
+
+    res.status(200).json({ success: true, order });
+  } catch (error) {
+    console.error('Error fetching order by ID:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching order.', error });
+  }
+};
+
+/**
+ * **Update Order Status (Admin)**
+ */
+export const updateOrderStatus = async (req, res) => {
+  const isAdmin = req.user.role === 'admin';
+  if (!isAdmin) {
+    return res.status(403).json({ success: false, message: 'Unauthorized to update order' });
+  };
+  const { status } = req.body;
+
+  if (!status || !['pending', 'confirmed', 'canceled', 'delivered', 'completed'].includes(status)) {
+    return res.status(400).json({ success: false, message: 'Invalid or missing status.' });
+  }
+
+  try {
+    const order = await Order.findById(req.params.id).populate('user', 'email');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    order.status = status;
+    await order.save();
+
+    // Optionally, send email notification to user about status update
+
+    res.status(200).json({ success: true, message: 'Order status updated successfully.', order });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ success: false, message: 'Server error updating order status.', error });
+  }
+};
+
+/**
+ * **Delete Order (Admin)**
+ */
+export const deleteOrder = async (req, res) => {
+  const isAdmin = req.user.role === 'admin';
+  if (!isAdmin) {
+    return res.status(403).json({ success: false, message: 'Unauthorized to delete order' });
+  };
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    await OrderDetail.deleteMany({ _id: { $in: order.order_details } });
+    await order.remove();
+
+    res.status(200).json({ success: true, message: 'Order and its details deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ success: false, message: 'Server error deleting order.', error });
+  }
+};
+
+export default {
+  createOrder,
+  getAllOrders,
+  getUserOrders,
+  getOrderById,
+  updateOrderStatus,
+  deleteOrder,
+};

@@ -11,9 +11,15 @@ const productVariantSchema = new mongoose.Schema({
     required: true, // Giá sản phẩm
   },
   images: [
-    {
-      type: String,
-      required: true, // Ảnh sản phẩm
+  {
+      public_id: {
+        type: String,
+        required: true, // Public ID from Cloudinary
+      },
+      url: {
+        type: String,
+        required: true, // URL of the uploaded image
+      },
     },
   ],
   quantity: {

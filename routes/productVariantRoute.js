@@ -1,24 +1,26 @@
+// productVariantRoute.js
 import express from 'express';
+import { verifyToken } from '../middleware/auth.js';
 import {
   getProductVariants,
   createProductVariant,
   updateProductVariant,
   deleteProductVariant,
 } from '../controllers/productVariantController.js';
-import { upload } from '../config/multerConfig.js';
+import { uploadImages } from '../controllers/uploadImageController.js';
 
 const router = express.Router();
 
-// Lấy danh sách variants
-router.get('/', getProductVariants);
+// Get Product Variants
+router.get('/', verifyToken, getProductVariants);
 
-// Tạo product variant mới (hỗ trợ upload nhiều ảnh)
-router.post('/create', upload.array('images', 5), createProductVariant); // Tối đa 5 ảnh
+// Create New Product Variant
+router.post('/', verifyToken, uploadImages, createProductVariant);
 
-// Cập nhật product variant
-router.put('/update/:id', upload.array('images', 5), updateProductVariant);
+// Update Product Variant
+router.put('/:id', verifyToken, uploadImages, updateProductVariant);
 
-// Xóa product variant
-router.delete('/delete/:id', deleteProductVariant);
+// Delete Product Variant
+router.delete('/:id', verifyToken, deleteProductVariant);
 
 export default router;
