@@ -2,29 +2,54 @@ import sendEmail from "../utils/emailService.js";
 import generateToken from "../middleware/auth.js";
 import crypto from "crypto";
 import userModel from "../models/userModel.js";
+import { generateOtp, saveOtp, verifyOtp } from "../utils/otpService.js";
 
 // register
 export const register = async (req, res) => {
   const { username, email, password } = req.body;
+
   try {
     const existingUser = await userModel.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already in use" });
+      return res.status(400).json({ message: 'Email already in use' });
     }
-    const newUser = new userModel({   
+
+    const newUser = new userModel({
       username,
       email,
       password,
     });
+
     await newUser.save();
 
-    // Send a welcome email
-    const message = `<p>Welcome, ${firstname}! Thank you for registering on our platform.</p>`;
-    await sendEmail(newUser.email, "Welcome to Hotel Booking", message);
+    const otp = generateOtp();
+    await saveOtp(email, otp);
 
-    res.status(201).json({ message: "Registration successful" });
+    const message = `
+      <p>Welcome, ${username}!</p>
+      <p>Your OTP for email verification is: <strong>${otp}</strong></p>
+      <p>Please verify your email within 5 minutes.</p>
+    `;
+
+    await sendEmail(newUser.email, 'Email Verification OTP', message);
+    res.status(201).json({ message: 'Registration successful. Please verify your email.' });
   } catch (error) {
-    res.status(500).json({ message: `Server error: ${error}` });
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
+// Xác thực OTP
+export const verifyEmailOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const isValid = await verifyOtp(email, otp);
+    if (isValid) {
+      return res.status(200).json({ message: 'Email verified successfully.' });
+    }
+    return res.status(400).json({ message: 'Invalid or expired OTP.' });
+  } catch (error) {
+    res.status(500).json({ message: `Server error: ${error.message}` });
   }
 };
 
@@ -96,4 +121,4 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-export default { register, login, forgotPassword, resetPassword };
+export default { register, verifyEmailOtp, login, forgotPassword, resetPassword };
