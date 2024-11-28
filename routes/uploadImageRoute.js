@@ -3,23 +3,19 @@ import { uploadImage, uploadImages, getImageUrl, deleteImage, updateImage } from
 
 const router = express.Router();
 
-// Route to upload an image
-router.post('/upload', uploadImage, (req, res) => {
-  res.status(200).json({ message: 'Image uploaded successfully', imageUrl: req.file.path });
-});
+// Route để upload một ảnh đơn
+router.post('/upload', uploadImage);
 
-// Route to upload multiple images
-router.post('/upload-multiple', uploadImages, (req, res) => {
-  res.status(200).json({ message: 'Images uploaded successfully', imageUrls: req.files.map(file => file.path) });
-});
+// Route để upload nhiều ảnh
+router.post('/upload-multiple', uploadImages);
 
-// Route to get an image URL
+// Route để lấy URL ảnh theo publicId
 router.get('/image/:publicId', (req, res) => {
   const imageUrl = getImageUrl(req.params.publicId);
   res.status(200).json({ imageUrl });
 });
 
-// Route to delete an image
+// Route để xóa ảnh theo publicId
 router.delete('/image/:publicId', async (req, res) => {
   try {
     await deleteImage(req.params.publicId);
@@ -29,7 +25,7 @@ router.delete('/image/:publicId', async (req, res) => {
   }
 });
 
-// Route to update an image
+// Route để cập nhật ảnh
 router.put('/image', updateImage);
 
 export default router;

@@ -1,19 +1,21 @@
-// config/multerConfig.js
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from './cloudinaryConfig.js';
+import { v4 as uuidv4 } from 'uuid'; // Thư viện UUID để tạo tên duy nhất
 
-// Configure Multer storage with Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'uploads', // Folder name in Cloudinary
-    allowed_formats: ['jpg', 'png', 'jpeg'],
-    transformation: [{ width: 500, height: 500, crop: 'limit' }],
+  params: async (req, file) => {
+    const uniqueName = `${uuidv4()}_${Date.now()}`;
+    return {
+      folder: 'uploads',
+      format: 'jpg', // Hoặc giữ nguyên định dạng file: file.mimetype.split('/')[1]
+      public_id: uniqueName, // Đặt tên file tùy chỉnh
+      transformation: [{ width: 500, height: 500, crop: 'limit' }],
+    };
   },
 });
 
-// Initialize Multer with the configured storage
 const upload = multer({ storage });
 
 export default upload;
