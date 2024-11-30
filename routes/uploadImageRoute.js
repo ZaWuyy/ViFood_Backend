@@ -23,7 +23,7 @@ router.delete('/image/:publicId', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: `Failed to delete image: ${error.message}` });
   }
-});
+})
 
 // Route để cập nhật ảnh
 router.put('/image', updateImage);

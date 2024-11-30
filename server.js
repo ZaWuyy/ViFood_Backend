@@ -38,21 +38,21 @@ app.use(express.json());
 
 connectDB();
 
-app.use('/api/auth', authRoute);
-app.use('/api/blog', verifyToken, blogRoute);
-app.use('/api/cart', verifyToken, cartRoute);
-app.use('/api/category', verifyToken, categoryRoute);
-app.use('/api/chat', verifyToken, chatRoute);
-app.use('/api/comment', verifyToken, commentRoute);
-app.use('/api/order-detail', verifyToken, orderDetailRoute);
-app.use('/api/order', verifyToken, orderRoute);
-app.use('/api/payment', verifyToken, paymentRoute);
-app.use('/api/product', verifyToken, productRoute);
-app.use('/api/product-variant', verifyToken, productVairantRoute);
-app.use('/api/rating', verifyToken, ratingRoute);
-app.use('/api/upload-image', verifyToken, uploadImageRoute);
-app.use('/api/user', verifyToken, userRoute);
-app.use('/api/voucher', verifyToken, voucherRoute);
+app.use('/api/auths', authRoute);
+app.use('/api/blogs', verifyToken, blogRoute);
+app.use('/api/carts', verifyToken, cartRoute);
+app.use('/api/categorys', verifyToken, categoryRoute);
+app.use('/api/chats', verifyToken, chatRoute);
+app.use('/api/comments', verifyToken, commentRoute);
+app.use('/api/order-details', verifyToken, orderDetailRoute);
+app.use('/api/orders', verifyToken, orderRoute);
+app.use('/api/payments', verifyToken, paymentRoute);
+app.use('/api/products', verifyToken, productRoute);
+app.use('/api/product-variants', verifyToken, productVairantRoute);
+app.use('/api/ratings', verifyToken, ratingRoute);
+app.use('/api/upload-images', verifyToken, uploadImageRoute);
+app.use('/api/users', verifyToken, userRoute);
+app.use('/api/vouchers', verifyToken, voucherRoute);
 
 
 app.get('/', (req, res) => {
