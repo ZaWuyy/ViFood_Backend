@@ -1,14 +1,44 @@
 import Blog from '../models/blogModel.js';
 
-// Get all blogs
+// Get all blogs với chức năng tìm kiếm và lọc
 export const getBlogs = async (req, res) => {
+  const { keyword, category, page = 1, limit = 10 } = req.query;
+
+  // Tạo đối tượng filter dựa trên các tham số truy vấn
+  let filter = {};
+
+  if (keyword) {
+    filter.$or = [
+      { title: { $regex: keyword, $options: 'i' } },
+      { content: { $regex: keyword, $options: 'i' } },
+    ];
+  }
+
+  if (category) {
+    filter.categories = category;
+  }
+
   try {
-    const blogs = await Blog.find().populate('categories').populate('images');
-    res.status(200).json(blogs);
+    const blogs = await Blog.find(filter)
+      .populate('categories')
+      .populate('images')
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 }); // Sắp xếp theo ngày tạo giảm dần
+
+    const total = await Blog.countDocuments(filter);
+
+    res.status(200).json({
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      blogs,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching blogs', error });
   }
 };
+
 
 // Get a single blog by ID
 export const getBlogById = async (req, res) => {

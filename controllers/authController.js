@@ -1,5 +1,5 @@
 import sendEmail from "../utils/emailService.js";
-import generateToken from "../middleware/auth.js";
+import {generateToken} from "../middleware/auth.js";
 import crypto from "crypto";
 import userModel from "../models/userModel.js";
 import { generateOtp, saveOtp, verifyOtp } from "../utils/otpService.js";
@@ -32,8 +32,38 @@ export const register = async (req, res) => {
     `;
 
     await sendEmail(newUser.email, 'Email Verification OTP', message);
-    res.status(201).json({ message: 'Registration successful. Please verify your email.' });
+    res.status(201).json( { newUser});
+    
   } catch (error) {
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
+// resend otp
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Kiểm tra xem email có tồn tại không (bạn có thể thêm logic kiểm tra người dùng ở đây)
+    
+    // Tạo OTP mới
+    const otp = generateOtp();
+    
+    // Lưu OTP vào Redis với thời gian hết hạn 5 phút
+    await saveOtp(email, otp);
+    
+    // Nội dung email
+    const message = `
+      <p>Your OTP for validate register is: <strong>${otp}</strong></p>
+      <p>Please use this OTP within 5 minutes.</p>
+    `;
+    
+    // Gửi email
+    await sendEmail(email, 'Resend OTP for validate register', message);
+    
+    res.status(200).json({ message: 'OTP resent successfully.' });
+  } catch (error) {
+    console.error('Error in resendOtp:', error);
     res.status(500).json({ message: `Server error: ${error.message}` });
   }
 };
@@ -59,14 +89,21 @@ export const login = async (req, res) => {
 
   try {
     const user = await userModel.findOne({ email });
+  
+
     if (!user || !(await user.isPasswordValid(password))) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken({ id: user._id, role: user.role });
+    console.log("User found:", user);
+    console.log("User role:", user.role);
+    console.log("User id:", user.email);
+    const token = generateToken({ email: user.email, role: user.role});
+    console.log("Generated token:", token);
     res.json({ token });
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({"error": error });
+    
   }
 };
 
@@ -121,4 +158,4 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-export default { register, verifyEmailOtp, login, forgotPassword, resetPassword };
+export default { register, resendOtp, verifyEmailOtp, login, forgotPassword, resetPassword };

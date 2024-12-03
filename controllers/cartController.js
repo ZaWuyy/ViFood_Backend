@@ -152,7 +152,10 @@ export const getCart = async (req, res) => {
             };
         });
 
-        res.status(200).json({ success: true, cartItems });
+         // Tính tổng số lượng sản phẩm trong giỏ hàng
+         const totalItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+        res.status(200).json({ success: true, cartItems,totalItems });
     } catch (error) {
         console.error('Error fetching cart data:', error);
         res.status(500).json({ success: false, message: 'Error in fetching cart data.' });

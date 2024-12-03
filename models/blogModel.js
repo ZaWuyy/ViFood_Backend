@@ -40,7 +40,9 @@ const BlogSchema = new mongoose.Schema({
     type: Date,
     default: Date.now, // Automatically sets the last updated time
   },
-});
+},{ timestamps: true });
+// Thêm text index cho các trường title và content
+BlogSchema.index({ title: 'text', content: 'text' });
 
 const Blog = mongoose.model('Blog', BlogSchema);
 export default Blog;
